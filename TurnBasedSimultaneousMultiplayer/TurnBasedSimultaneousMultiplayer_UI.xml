@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AlarmClock_UI -->
+<!-- Author: Isaac Supeene -->
+<!-- DateCreated: 4/4/2020 1:32:55 PM -->
+<Context Name="TBSMContext">
+
+	<!-- Button on the top panel -->
+	<Stack					ID="TBSMContents"	StackGrowth="Left" Anchor="R,T" Padding="3">
+		<Container												Size="2,1" />
+		<Button ID="TBSMNextTurnButton" Size="29,29" Anchor="C,C" Texture="AlarmClock_Icon.dds" ToolTip="LOC_TBSM_TURN" ConsumeMouse="1"/>
+		<Container												Size="2,1" />
+		<Stack				ID="TBSMInfoArea"				Anchor="R,T" Offset="14,8"		StackGrowth="Right" >
+			<AlphaAnim	ID="TBSMCallback" Cycle="Once" Speed="0.5" />
+			<Label			ID="TBSMRemainingActions" Style="TopBarMeta" String="Remaining Actions" />
+		</Stack>
+	</Stack>	
+</Context>

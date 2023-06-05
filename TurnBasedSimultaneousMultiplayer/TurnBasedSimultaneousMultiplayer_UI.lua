@@ -6,9 +6,31 @@
 -- Author: Patrick Fink
 -- DateCreated: 4/4/2020 1:53:04 PM
 --------------------------------------------------------------
+--[[
+TODOs:
+
+- Peace
+- Allies
+- Triangle Wars
+- Re-enable military actions when count goes > 0
+- Initial Loading (Randomized)
+- Testing
+- Give unlimited actions when oponent has ended turn 
+- ... (or no military actions left)
+- (Optimize Queue)
+- (Persistence)
+- (Limited Simoultanous Mode)
+- (Bonus Movement Points)
+- (First Strike Bonus)
+
+--]]
+
 
 include("TutorialUIRoot_Expansion1.lua");
 include("PopupDialog.lua");
+
+-- Debugging
+local singlePlayerTestingMode = true;
 
 -- Settings
 local tbsm_Setting_MilitaryActionsPerTurn = 1;
@@ -28,17 +50,19 @@ end
 Verbose("Start Initialization");
 
 
-local function Refresh()
+local function RefreshUI()
 	local myRemainingActions = tbsm_RemainingMilitaryActions[Game.GetLocalPlayer()];
 	Controls.TBSMRemainingActions:SetText( Locale.Lookup("LOC_TBSM_REMAINING_ACTIONS") .. ": " ..  tostring(myRemainingActions));
 end
 
 
-local function Initialize()
-	playerID = Game.GetLocalPlayer();
-	Verbose("PlayerID" .. playerID);
-	tbsm_RemainingMilitaryActions[playerID] = tbsm_Setting_MilitaryActionsPerTurn;
-	Refresh();
+local function Initialize(playerID:number, isHisTurn:boolean)
+	Verbose("Initialize PlayerID" .. playerID);
+	tbsm_RemainingMilitaryActions[playerID] = isHisTurn and tbsm_Setting_MilitaryActionsPerTurn or 0;
+
+	if playerID == Game.GetLocalPlayer() then
+		RefreshUI();
+	end
 end
 
 -----------------
@@ -76,6 +100,7 @@ end
 -- The top panel button next to the CivPedia
 local function OnTopPanelButtonClick()
   Verbose("TBSM: OnTopPanelButtonClick");
+  initNextTbsmTurn(Game.GetLocalPlayer(), false); -- TODO: Fix runtime error
   ShowDialog();
 end
 
@@ -89,7 +114,7 @@ local function unitIsMilitary(unit)
 	return unit:GetCombat() > 0 or unit:GetRangedCombat() > 0 or unit:GetBombardCombat() > 0 or unit:GetAntiAirCombat() > 0; -- A bit glitchy, but the most efficient way I know to find out all military unit types; units with no attacks remaining don't have to be blocked because they have no action left anyway
 end
 
-local function forbidAllMilitaryActions()
+local function ForbidAllMilitaryActions()
 	local count = 0
 	for key, val in pairs(Players) do Verbose("Key " .. key) end
 	Verbose("bla " .. count);
@@ -105,7 +130,12 @@ local function forbidAllMilitaryActions()
 			LuaEvents.Tutorial_AddUnitHexRestriction(unitType, {});
 			AddMapUnitMoveRestriction(unitType);
 			DisableUnitAction("UNITOPERATION_MOVE_TO", unitType);
-		end		
+			DisableUnitAction("UNITOPERATION_MOVE_TO_UNIT", unitType);
+			DisableUnitAction("UNITOPERATION_AIR_ATTACK", unitType);
+			DisableUnitAction("UNITOPERATION_COASTAL_RAID", unitType);
+			DisableUnitAction("UNITOPERATION_WMD_STRIKE", unitType);
+			DisableUnitAction("UNITOPERATION_UPGRADE", unitType); 
+		end
 		--DisableUnitAction( "UNITCOMMAND_AUTOMATE", unitType );
 		--DisableUnitAction( "UNITOPERATION_AUTOMATE_EXPLORE", unitType );
 		--DisableUnitAction( "UNITOPERATION_SKIP_TURN", unitType );
@@ -116,40 +146,110 @@ local function forbidAllMilitaryActions()
 	end
 end
 
+local function initNextTbsmTurn(actingPlayerID:number, isHisTurn:boolean)
+	--local localPlayer = Game.GetLocalPlayer();
+	local actingPlayer = Players[actingPlayerID];
+	Verbose("PID: " .. actingPlayer:GetID());
+	if actingPlayer:GetDiplomacy():IsAtWarWithHumans() or singlePlayerTestingMode then
+	--if true then
+		for i, pPlayer in ipairs(PlayerManager.GetAliveMajors()) do			
+			local iPlayer :number = pPlayer:GetID();
+			if (pPlayer:IsHuman() or singlePlayerTestingMode)
+				and actingPlayer:GetDiplomacy():IsAtWarWith(iPlayer)
+				--and (tbsm_RemainingMilitaryActions[iPlayer] == nil or tbsm_RemainingMilitaryActions[iPlayer] == 0)
+			then
+				Initialize(actingPlayerID, isHisTurn); -- Reset action counter
+				Initialize(iPlayer, not isHisTurn);
+			end
+		end
+	end
+end
 
-local function OnUnitMoved( playerID:number, unitID:number )
-	Verbose("TBSM: OnUnitMoved " .. unitID);
-	
+local function consumeIfMilitaryAction(playerID:number, unitID:number)
 	pUnit = UnitManager.GetUnit(playerID, unitID);
-	Verbose("test " .. tostring(pUnit));
-	Verbose("playerID " .. playerID);
+	Verbose("isUnit " .. tostring(pUnit));
+	Verbose("May consume Action of PlayerID " .. playerID);
 
-	if unitIsMilitary(pUnit) and tbsm_RemainingMilitaryActions[playerID] ~= nil then
-		local unitType:string = GameInfo.Units[pUnit:GetUnitType()].UnitType;	
+	if (Players[playerID]:GetDiplomacy():IsAtWarWithHumans() or singlePlayerTestingMode) and unitIsMilitary(pUnit) and tbsm_RemainingMilitaryActions[playerID] ~= nil then
+		Verbose("Consume Action");
 		tbsm_RemainingMilitaryActions[playerID] = tbsm_RemainingMilitaryActions[playerID] - 1;
 
 		if tbsm_RemainingMilitaryActions[playerID] <= 0 then
-			forbidAllMilitaryActions()
+			initNextTbsmTurn(playerID, false);
+
+			if Game.GetLocalPlayer() == playerID then
+				RefreshUI();
+				ForbidAllMilitaryActions();
+			end
 		end
 	end
-
-	Refresh();	
 end
+
+
+local function OnUnitMoved(playerID:number, unitID:number )
+	Verbose("TBSM: OnUnitMoved " .. unitID);	
+
+	consumeIfMilitaryAction(playerID, unitID);
+end
+
+function OnCombatVisBegin(combatMembers)	
+	local attacker = combatMembers[0];
+	Verbose("TBSM: OnCombatVisBegin " .. attacker.componentID);
+	Verbose("Type " .. attacker.componentType);
+	Verbose("Type Unit " .. ComponentType.UNIT);
+	if attacker.componentType == ComponentType.UNIT then
+		consumeIfMilitaryAction(attacker.playerID, attacker.componentID);	
+	end
+end
+
+--[[
+function OnUnitOperationStarted(ownerID:number, unitID:number, operationID:number)
+	Verbose("TBSM: OnUnitOperationSegmentComplete " .. operationID);
+
+	if operationID == UnitOperationTypes.MOVE_TO_UNIT or	   
+	   operationID == UnitOperationTypes.RANGE_ATTACK or
+	   operationID == UnitOperationTypes.AIR_ATTACK or
+	   operationID == UnitOperationTypes.WMD_STRIKE or
+	   operationID == UnitOperationTypes.COASTAL_RAID or
+	   operationID == UnitOperationTypes.PILLAGE or	   
+	   operationID == UnitOperationTypes.UPGRADE
+	   -- TELEPORT_TO_CITY, DEPLOY, REBASE should may be covered by UnitMoved
+	then
+		consumeIfMilitaryAction();
+	end	
+end
+--]]
+
+
 
 -- Callback when we load into the game for the first time
 local function OnLoadGameViewStateDone()
-  Verbose("TBSM: OnLoadGameViewStateDone");
-  Initialize();
+  --initNextTbsmTurn(Game.GetLocalPlayer()); -- TODO: Persistence
+end
+
+local function OnDiplomacyDeclareWar(actingPlayer, reactingPlayer)
+  Verbose("TBSM: OnDiplomacyDeclareWar");
+  --Initialize();
+  initNextTbsmTurn(actingPlayer, true);
   AddButtonToTopPanel();  
   ContextPtr:SetHide(false);
 end
 
+--[[
+local function OnUnitSelectionChanged()
+
+end
+--]]
 
 ----------------
 -- Main Setup --
 ----------------
 
 Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone);
+Events.DiplomacyDeclareWar.Add(OnDiplomacyDeclareWar);
+--Events.UnitSelectionChanged.Add(OnUnitSelectionChanged);
+Events.CombatVisBegin.Add(OnCombatVisBegin);
+--Events.UnitOperationStarted.Add(OnUnitOperationStarted);
 ContextPtr:SetInputHandler(InputHandler, true);
 
 Controls.TBSMNextTurnButton:RegisterCallback(Mouse.eLClick, OnTopPanelButtonClick);

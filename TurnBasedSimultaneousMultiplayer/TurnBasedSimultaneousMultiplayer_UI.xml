@@ -5,7 +5,7 @@
 <Context Name="TBSMContext">
 
 	<!-- Button on the top panel -->
-	<Stack					ID="TBSMContents"	StackGrowth="Left" Anchor="R,T" Padding="3">
+	<Stack					ID="TbsmSection"	StackGrowth="Left" Anchor="R,T" Padding="3">
 		<Container												Size="2,1" />
 		<Button ID="TBSMNextTurnButton" Size="29,29" Anchor="C,C" Texture="AlarmClock_Icon.dds" ToolTip="LOC_TBSM_TURN" ConsumeMouse="1"/>
 		<Container												Size="2,1" />

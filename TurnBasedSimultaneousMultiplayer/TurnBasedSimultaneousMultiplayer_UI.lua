@@ -9,10 +9,10 @@
 --[[
 TODOs:
 
-- Peace
+
 - Allies
 - Triangle Wars
-- Re-enable military actions when count goes > 0
+- Switch beginning player each Civ turn
 - Initial Loading (Randomized)
 - Testing
 - Give unlimited actions when oponent has ended turn 
@@ -23,6 +23,12 @@ TODOs:
 - (Bonus Movement Points)
 - (First Strike Bonus)
 
+Turn % WarParticipantCount == WarParticipantID
+
+DONE
+- Re-enable military actions when count goes > 0
+- Continue button
+- Peace
 --]]
 
 
@@ -56,28 +62,27 @@ local function RefreshUI()
 end
 
 
-local function Initialize(playerID:number, isHisTurn:boolean)
-	Verbose("Initialize PlayerID" .. playerID);
-	tbsm_RemainingMilitaryActions[playerID] = isHisTurn and tbsm_Setting_MilitaryActionsPerTurn or 0;
-
-	if playerID == Game.GetLocalPlayer() then
-		RefreshUI();
-	end
-end
-
 -----------------
 -- UI Mutators --
 -----------------
 
 
-local function AddButtonToTopPanel()
+local function initTbsmUI()
   Verbose("TBSM: AddButtonToTopPanel");
 
-  local topPanel = ContextPtr:LookUpControl("/InGame/TopPanel/RightContents"); -- Top-right stack with Clock, Civilopedia, and Menu
-  Controls.TBSMContents:ChangeParent(topPanel);
-  topPanel:AddChildAtIndex(Controls.TBSMContents, 5); -- Insert left to the clock
+  local topPanel = ContextPtr:LookUpControl("/InGame/TopPanel/RightContents"); -- Top-right stack with Clock, Civilopedia, and Menu  
+  Controls.TbsmSection:ChangeParent(topPanel);
+  topPanel:AddChildAtIndex(Controls.TbsmSection, 5); -- Insert left to the clock
   topPanel:CalculateSize();
-  topPanel:ReprocessAnchoring();
+  topPanel:ReprocessAnchoring();  
+end
+
+local function ShowTbsmUI()
+  Controls.TbsmSection:SetHide(false);
+end
+
+local function HideTbsmUI()
+  Controls.TbsmSection:SetHide(true);
 end
 
 
@@ -95,14 +100,6 @@ end
 ---------------
 -- Callbacks --
 ---------------
-
-
--- The top panel button next to the CivPedia
-local function OnTopPanelButtonClick()
-  Verbose("TBSM: OnTopPanelButtonClick");
-  initNextTbsmTurn(Game.GetLocalPlayer(), false); -- TODO: Fix runtime error
-  ShowDialog();
-end
 
 local function unitIsMilitary(unit)
 	Verbose("Attacks remaining: " .. unit:GetAttacksRemaining());
@@ -123,7 +120,7 @@ local function ForbidAllMilitaryActions()
 	Verbose("Players " .. tostring(Players[localPlayer]));
 	local playerUnits = Players[localPlayer]:GetUnits();
 	for i, unit in playerUnits:Members() do
-		local unitType:string = GameInfo.Units[pUnit:GetUnitType()].UnitType;
+		local unitType:string = GameInfo.Units[unit:GetUnitType()].UnitType;
 		--local unitTypeName = UnitManager.GetTypeName(unit);
 		Verbose("Unit Type:  " .. unitType);		
 		if unitIsMilitary(unit) then 
@@ -146,13 +143,56 @@ local function ForbidAllMilitaryActions()
 	end
 end
 
+local function AllowAllMilitaryActions()
+	local count = 0
+	for key, val in pairs(Players) do Verbose("Key " .. key) end
+	Verbose("bla " .. count);
+	local localPlayer = Game.GetLocalPlayer();
+	Verbose("Player " .. localPlayer);
+	Verbose("Players " .. tostring(Players[localPlayer]));
+	local playerUnits = Players[localPlayer]:GetUnits();
+	for i, unit in playerUnits:Members() do
+		local unitType:string = GameInfo.Units[unit:GetUnitType()].UnitType;
+		if unitIsMilitary(unit) then 
+			LuaEvents.Tutorial_AddUnitHexRestriction(unitType, {});
+			RemoveMapUnitMoveRestriction(unitType);
+			EnableUnitAction("UNITOPERATION_MOVE_TO", unitType);
+			EnableUnitAction("UNITOPERATION_MOVE_TO_UNIT", unitType);
+			EnableUnitAction("UNITOPERATION_AIR_ATTACK", unitType);
+			EnableUnitAction("UNITOPERATION_COASTAL_RAID", unitType);
+			EnableUnitAction("UNITOPERATION_WMD_STRIKE", unitType);
+			EnableUnitAction("UNITOPERATION_UPGRADE", unitType); 
+		end
+		--EnableUnitAction( "UNITCOMMAND_AUTOMATE", unitType );
+		--EnableUnitAction( "UNITOPERATION_AUTOMATE_EXPLORE", unitType );
+		--EnableUnitAction( "UNITOPERATION_SKIP_TURN", unitType );
+		--EnableUnitAction( "UNITOPERATION_FORTIFY", unitType);
+		--EnableUnitAction( "UNITOPERATION_HEAL",	unitType);
+		--EnableUnitAction( "UNITCOMMAND_CANCEL",	unitType);
+		--EnableUnitAction( "UNITOPERATION_SLEEP",	unitType);
+	end
+end
+
+local function Initialize(playerID:number, isHisTurn:boolean)
+	Verbose("Initialize PlayerID" .. playerID);
+	tbsm_RemainingMilitaryActions[playerID] = isHisTurn and tbsm_Setting_MilitaryActionsPerTurn or 0;
+
+	if playerID == Game.GetLocalPlayer() then
+		RefreshUI();
+		if isHisTurn then
+			AllowAllMilitaryActions();
+		else
+			ForbidAllMilitaryActions();
+		end
+	end
+end
+
+
 local function initNextTbsmTurn(actingPlayerID:number, isHisTurn:boolean)
-	--local localPlayer = Game.GetLocalPlayer();
 	local actingPlayer = Players[actingPlayerID];
 	Verbose("PID: " .. actingPlayer:GetID());
 	if actingPlayer:GetDiplomacy():IsAtWarWithHumans() or singlePlayerTestingMode then
-	--if true then
-		for i, pPlayer in ipairs(PlayerManager.GetAliveMajors()) do			
+		for i, pPlayer in ipairs(PlayerManager.GetAliveMajors()) do
 			local iPlayer :number = pPlayer:GetID();
 			if (pPlayer:IsHuman() or singlePlayerTestingMode)
 				and actingPlayer:GetDiplomacy():IsAtWarWith(iPlayer)
@@ -185,6 +225,12 @@ local function consumeIfMilitaryAction(playerID:number, unitID:number)
 	end
 end
 
+-- The top panel button next to the CivPedia
+local function OnTopPanelButtonClick()
+  Verbose("TBSM: OnTopPanelButtonClick");
+  initNextTbsmTurn(Game.GetLocalPlayer(), false);
+  ShowDialog();
+end
 
 local function OnUnitMoved(playerID:number, unitID:number )
 	Verbose("TBSM: OnUnitMoved " .. unitID);	
@@ -224,17 +270,31 @@ end
 
 -- Callback when we load into the game for the first time
 local function OnLoadGameViewStateDone()
-  --initNextTbsmTurn(Game.GetLocalPlayer()); -- TODO: Persistence
+	initTbsmUI();
+
+	if Players[Game.GetLocalPlayer()]:GetDiplomacy():IsAtWarWithHumans() or singlePlayerTestingMode then
+		initNextTbsmTurn(Game.GetLocalPlayer(), true); -- TODO: Determine the right player who starts -- TODO: Persistence
+		ShowTbsmUI();
+		ContextPtr:SetHide(false);
+	else
+		HideTbsmUI();
+	end
 end
 
-local function OnDiplomacyDeclareWar(actingPlayer, reactingPlayer)
+local function OnDiplomacyDeclareWar(actingPlayer:number, reactingPlayer:number)
   Verbose("TBSM: OnDiplomacyDeclareWar");
   --Initialize();
   initNextTbsmTurn(actingPlayer, true);
-  AddButtonToTopPanel();  
+  ShowTbsmUI();
   ContextPtr:SetHide(false);
 end
 
+local function OnDiplomacyMakePeace(actingPlayer:number, reactingPlayer:number)
+	if not Players[Game.GetLocalPlayer()]:GetDiplomacy():IsAtWarWithHumans() then
+		AllowAllMilitaryActions();
+		HideTbsmUI();		
+	end	
+end
 --[[
 local function OnUnitSelectionChanged()
 
@@ -247,6 +307,7 @@ end
 
 Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone);
 Events.DiplomacyDeclareWar.Add(OnDiplomacyDeclareWar);
+Events.DiplomacyMakePeace.Add(OnDiplomacyMakePeace);
 --Events.UnitSelectionChanged.Add(OnUnitSelectionChanged);
 Events.CombatVisBegin.Add(OnCombatVisBegin);
 --Events.UnitOperationStarted.Add(OnUnitOperationStarted);

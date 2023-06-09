@@ -13,6 +13,9 @@
 		<Row Tag="LOC_TBSM_ACTION_NOT_POSSIBLE_DIALOG_TEXT" Language="en_US">
 			<Text>You're not allowed to do this action because you're in war with a player and have exhausted your military movement and attack limit. Your opponent has to exhaust his limit or end his turn until you can take further military actions.</Text>
 		</Row>
+		<Row Tag="LOC_TBSM_NOT_YOUR_TURN" Language="en_US">
+			<Text>Military actions blocked, waiting for other players...</Text>
+		</Row>
 		<Row Tag="LOC_TBSM_REMAINING_ACTIONS" Language="de_DE">
 			<Text>Remaining Military Actions</Text>
 		</Row>

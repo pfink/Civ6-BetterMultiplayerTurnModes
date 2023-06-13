@@ -2,12 +2,12 @@
 <Project ToolsVersion="12.0" DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Default</Configuration>
-    <Name>Turn Based Simultaneous Multiplayer</Name>
+    <Name>Better Multiplayer Turn Modes</Name>
     <Guid>db2d862d-df4e-4718-9565-508a37c29f81</Guid>
     <ProjectGuid>67da609f-0420-464b-91ef-6c3552627846</ProjectGuid>
     <ModVersion>1</ModVersion>
-    <Teaser>This mod adds the Turn Based Simultaneous Multiplayer setting.</Teaser>
-    <Description>This mod adds the Turn Based Simultaneous Multiplayer setting.</Description>
+    <Teaser>This mod adds more turn modes for Internet Multiplayer Games.</Teaser>
+    <Description>This mod adds more turn modes for Internet Multiplayer Games.</Description>
     <Authors>Patrick Fink</Authors>
     <AffectsSavedGames>false</AffectsSavedGames>
     <SupportsSinglePlayer>true</SupportsSinglePlayer>
@@ -16,60 +16,63 @@
     <CompatibleVersions>1.2,2.0</CompatibleVersions>
     <FrontEndActionData><![CDATA[
         <FrontEndActions>
-          <UpdateDatabase id="TBSM_SETUP_SETTINGS">
-            <File>setup/TurnPhases.xml</File>
+          <UpdateDatabase id="BMTM_SETUP_SETTINGS">
+            <File>setup/BMTM_Config.xml</File>
           </UpdateDatabase>		
-          <UpdateText id="TBSM_SETUP_TEXT">
-              <File>setup/TBSM_Setup_Text.xml</File>
+          <UpdateText id="BMTM_SETUP_TEXT">
+              <File>setup/BMTM_Setup_Text.xml</File>
           </UpdateText>    
       </FrontEndActions>
       ]]></FrontEndActionData>
     <InGameActionData><![CDATA[
       <InGameActions>
-        <AddUserInterfaces id="TBSMUI">
+        <AddUserInterfaces id="BMTM_UI">
           <Properties>
             <Context>InGame</Context>
             <LoadOrder>14000</LoadOrder>
           </Properties>
-          <File>TurnBasedSimultaneousMultiplayer_UI.xml</File>
+          <File>ingame/BMTM_UI.xml</File>
         </AddUserInterfaces>
         <ImportFiles id="LoadAlarmClockIcon">
           <Properties>
             <Context>InGame</Context>
             <LoadOrder>400</LoadOrder>
           </Properties>
-          <File>AlarmClock_Icon.dds</File>
+          <File>ingame/AlarmClock_Icon.dds</File>
         </ImportFiles>
         <UpdateText id="Text">
-          <File>TurnBasedSimultaneousMultiplayer_Text.xml</File>
+          <File>ingame/BMTM_InGame_Text.xml</File>
         </UpdateText>
       </InGameActions>
       ]]></InGameActionData>
-    <AssemblyName>TurnBasedSimultaneousMultiplayer</AssemblyName>
-    <RootNamespace>TurnBasedSimultaneousMultiplayer</RootNamespace>
+    <AssemblyName>BetterMultiplayerTurnModes</AssemblyName>
+    <RootNamespace>BetterMultiplayerTurnModes</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Default' ">
     <OutputPath>.</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="AlarmClock_Icon.dds">
+    <Content Include="ingame\AlarmClock_Icon.dds">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="setup\TBSM_Setup_Text.xml">
+    <Content Include="ingame\BMTM_InGame_Text.xml">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="setup\TurnPhases.xml">
+    <Content Include="ingame\BMTM_UI.lua">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="TurnBasedSimultaneousMultiplayer_UI.xml">
+    <Content Include="ingame\BMTM_UI.xml">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="TurnBasedSimultaneousMultiplayer_UI.lua">
+    <Content Include="setup\BMTM_Setup_Text.xml">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="TurnBasedSimultaneousMultiplayer_Text.xml" />
+    <Content Include="setup\BMTM_Config.xml">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="ingame" />
     <Folder Include="setup" />
   </ItemGroup>
   <Import Project="$(MSBuildLocalExtensionPath)Civ6.targets" />

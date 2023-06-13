@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<LocalizedText>
+		<Row Tag="LOC_TBSM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ" Language="en_US">
+			<Text>TBSM Dynamic Simultaneous Turns 1</Text>
+		</Row>
+		<Row Tag="LOC_TBSM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ_DESC" Language="en_US">
+			<Text>Players at peace take their turns at the same time. Players at war take their civil actions at the same time, but their military actions sequentially (military units cannot attack or move while another player is doing his military actions).</Text>
+		</Row>
+		<Row Tag="LOC_TBSM_MILITARY_ACTIONS_PER_TBSM_TURN" Language="en_US">
+			<Text>Military Action Limit</Text>
+		</Row>
+	</LocalizedText>
+</GameData>

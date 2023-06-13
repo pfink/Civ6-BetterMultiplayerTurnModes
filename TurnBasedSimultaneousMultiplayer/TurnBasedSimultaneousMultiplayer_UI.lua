@@ -12,7 +12,7 @@ TODOs:
 - Menu Configuration
 - Declare War: Clean Turn Queue Update
 - Testing
-- Give unlimited actions when oponent has ended turn 
+
 - ... (or no military actions left)
 - (let attacker start war)
 - (Restrict Units based on GameInfo.Units)
@@ -25,6 +25,7 @@ TODOs:
 
 
 DONE
+- Give unlimited actions when oponent has ended turn
 - Initial Loading (Randomized)
 - Triangle Wars
 - Switch beginning player each Civ turn
@@ -199,6 +200,19 @@ end
 
 local function initNextTbsmTurn()
 	Verbose("Init next TBSM turn. Queue Index before:" .. tbsm_WarParticipantsQueueIndex);
+	local i = 0;
+	Verbose(tbsm_WarParticipants[tbsm_WarParticipantsQueueIndex+1]);
+	Verbose(Players[tbsm_WarParticipants[tbsm_WarParticipantsQueueIndex+1]]);
+	Verbose(Players[tbsm_WarParticipants[tbsm_WarParticipantsQueueIndex+1]]:IsHuman());
+	Verbose(Players[tbsm_WarParticipants[tbsm_WarParticipantsQueueIndex+1]]:IsTurnActive());
+	-- Skip players who have ended their turn
+	while not Players[tbsm_WarParticipants[tbsm_WarParticipantsQueueIndex+1]]:IsTurnActive()
+		  and Players[tbsm_WarParticipants[tbsm_WarParticipantsQueueIndex+1]]:IsHuman()
+		  and i <= #tbsm_WarParticipants do
+		tbsm_WarParticipantsQueueIndex = (tbsm_WarParticipantsQueueIndex + 1) % #tbsm_WarParticipants;
+		i = i + 1;	
+	end
+	-- Initialize next TBSM turn
 	for i, iPlayer in ipairs(tbsm_WarParticipants) do
 		Verbose("War Participant ID:" .. i);
 		Initialize(iPlayer, (i-1) == tbsm_WarParticipantsQueueIndex); -- Lua table index begins at 1, that's why we have to substract		
@@ -338,6 +352,12 @@ local function OnTurnBegin()
 	initNextCivTurn();
 end
 
+function OnPlayerTurnDeactivated( iPlayer:number )
+	if isAtWarWithHumans(Game.GetLocalPlayer()) and tbsm_RemainingMilitaryActions[iPlayer] > 0 then
+		initNextTbsmTurn();
+	end
+end
+
 local function OnMultiplayerChat(fromPlayer, toPlayer, text, eTargetType)
 	Verbose("Next turn initialized manuallly" .. fromPlayer);
 	if string.lower(text) == ".tbsm_next_player" and tbsm_RemainingMilitaryActions[fromPlayer] > 0 then
@@ -353,6 +373,7 @@ Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone);
 Events.DiplomacyDeclareWar.Add(OnDiplomacyDeclareWar);
 Events.DiplomacyMakePeace.Add(OnDiplomacyMakePeace);
 Events.TurnBegin.Add(OnTurnBegin);
+Events.PlayerTurnDeactivated.Add(OnPlayerTurnDeactivated);
 
 --Events.UnitSelectionChanged.Add(OnUnitSelectionChanged);
 Events.CombatVisBegin.Add(OnCombatVisBegin);

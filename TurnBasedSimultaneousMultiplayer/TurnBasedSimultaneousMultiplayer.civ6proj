@@ -14,6 +14,16 @@
     <SupportsMultiplayer>true</SupportsMultiplayer>
     <SupportsHotSeat>false</SupportsHotSeat>
     <CompatibleVersions>1.2,2.0</CompatibleVersions>
+    <FrontEndActionData><![CDATA[
+        <FrontEndActions>
+          <UpdateDatabase id="TBSM_SETUP_SETTINGS">
+            <File>setup/TurnPhases.xml</File>
+          </UpdateDatabase>		
+          <UpdateText id="TBSM_SETUP_TEXT">
+              <File>setup/TBSM_Setup_Text.xml</File>
+          </UpdateText>    
+      </FrontEndActions>
+      ]]></FrontEndActionData>
     <InGameActionData><![CDATA[
       <InGameActions>
         <AddUserInterfaces id="TBSMUI">
@@ -45,6 +55,12 @@
     <Content Include="AlarmClock_Icon.dds">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="setup\TBSM_Setup_Text.xml">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="setup\TurnPhases.xml">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="TurnBasedSimultaneousMultiplayer_UI.xml">
       <SubType>Content</SubType>
     </Content>
@@ -52,6 +68,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="TurnBasedSimultaneousMultiplayer_Text.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="setup" />
   </ItemGroup>
   <Import Project="$(MSBuildLocalExtensionPath)Civ6.targets" />
 </Project>

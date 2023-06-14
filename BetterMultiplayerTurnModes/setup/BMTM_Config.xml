@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameInfo>
 	<TurnPhases>
-		<Row TurnPhaseType="TURNPHASE_TWOPHASE"	Name="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN"	Description="LOC_BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ_DESC"	SortIndex="10" />
+		<Row TurnPhaseType="TURNPHASE_TWOPHASE"	Name="LOC_BMTM_TURNPHASE_TWOPHASE"	Description="LOC_BMTM_TURNPHASE_TWOPHASE_DESC"	SortIndex="10" />
 	</TurnPhases>
 	<Parameters>
 		<Row ParameterId="TurnPhaseType" Visible="0" Name="LOC_GAME_TURNPHASE_TYPE" Description="LOC_GAME_TURNPHASE_DESC" Domain="StandardTurnPhases" Hash="1" DefaultValue="TURNPHASE_SIMULTANEOUS" ConfigurationGroup="Game" ConfigurationId="TURN_PHASE_TYPE" GroupId="GameOptions" SupportsSinglePlayer="0" SupportsHotSeat="0" SupportsPlayByCloud="0" ChangeableAfterGameStart="0" SortIndex="40" />
-		<Row ParameterId="BMTM_TurnPhaseType" Name="LOC_GAME_TURNPHASE_TYPE" Description="LOC_GAME_TURNPHASE_DESC" Domain="BMTMTurnPhases" Hash="1" DefaultValue="BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ" ConfigurationGroup="Game" ConfigurationId="BMTM_TURN_PHASE_TYPE" GroupId="GameOptions" SupportsSinglePlayer="0" SupportsHotSeat="0" SupportsPlayByCloud="0" ChangeableAfterGameStart="0" SortIndex="40" />
+		<Row ParameterId="BMTM_TurnPhaseType" Name="LOC_GAME_TURNPHASE_TYPE" Description="LOC_GAME_TURNPHASE_DESC" Domain="BMTMTurnPhases" Hash="1" DefaultValue="BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ" ConfigurationGroup="Game" ConfigurationId="BMTM_TURN_PHASE_TYPE" GroupId="GameOptions" SupportsSinglePlayer="0" SupportsHotSeat="0" SupportsPlayByCloud="0" ChangeableAfterGameStart="1" SortIndex="40" />
+		<Row ParameterId="BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Name="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Description="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN_DESC" Domain="uint" Hash="0" DefaultValue="5" ConfigurationGroup="Game" ConfigurationId="BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" GroupId="GameOptions" ChangeableAfterGameStart="1" SortIndex="41"/>
 	</Parameters>
 	<DomainValues>
 		<Row Domain="BMTMTurnPhases" Value="BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ" Name="LOC_BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ" Description="LOC_BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ_DESC" SortIndex="10"/>
-		<Row Domain="BMTMTurnPhases" Value="TURNPHASE_SIMULTANEOUS" Name="LOC_TURNPHASE_SIMULTANEOUS" Description="LOC_TURNPHASE_SIMULTANEOUS_DESC" SortIndex="20"/>
-		<Row Domain="BMTMTurnPhases" Value="TURNPHASE_DYNAMIC" Name="LOC_TURNPHASE_DYNAMIC" Description="LOC_TURNPHASE_DYNAMIC_DESC" SortIndex="30"/>		
-		<Row Domain="BMTMTurnPhases" Value="TURNPHASE_TWOPHASE" Name="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Description="LOC_BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ_DESC" SortIndex="40"/>
+		<Row Domain="BMTMTurnPhases" Value="BMTM_TURNPHASE_DYN_SIM_SINGLE" Name="LOC_BMTM_TURNPHASE_DYN_SIM_SINGLE" Description="LOC_BMTM_TURNPHASE_DYN_SIM_SINGLE_DESC" SortIndex="20"/>
+		<Row Domain="BMTMTurnPhases" Value="TURNPHASE_SIMULTANEOUS" Name="LOC_TURNPHASE_SIMULTANEOUS" Description="LOC_TURNPHASE_SIMULTANEOUS_DESC" SortIndex="30"/>
+		<Row Domain="BMTMTurnPhases" Value="TURNPHASE_DYNAMIC" Name="LOC_TURNPHASE_DYNAMIC" Description="LOC_TURNPHASE_DYNAMIC_DESC" SortIndex="40"/>		
+		<Row Domain="BMTMTurnPhases" Value="TURNPHASE_TWOPHASE" Name="LOC_BMTM_TURNPHASE_TWOPHASE" Description="LOC_BMTM_TURNPHASE_TWOPHASE_DESC" SortIndex="50"/>
 	</DomainValues>
+	<ParameterCriteria>
+		<!-- <Row ParameterId="BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" ConfigurationGroup="Game" ConfigurationId="BMTM_TurnPhaseType" Operator="Equals" ConfigurationValue="BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ" />-->
+	</ParameterCriteria>
+	<ParameterDependencies>
+		<Row ParameterId="BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" ConfigurationGroup="Game" ConfigurationId="BMTM_TURN_PHASE_TYPE" Operator="Equals" ConfigurationValue="BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ" />
+	</ParameterDependencies>
 	<ConfigurationUpdates>
 		<!--<Row ParameterId="TurnPhaseType" Name="LOC_GAME_TURNPHASE_TYPE" Description="LOC_GAME_TURNPHASE_DESC" Domain="StandardTurnPhases" Hash="1" DefaultValue="TURNPHASE_SIMULTANEOUS" ConfigurationGroup="Game" ConfigurationId="TURN_PHASE_TYPE" GroupId="GameOptions" SupportsSinglePlayer="0" SupportsHotSeat="0" SupportsPlayByCloud="0" ChangeableAfterGameStart="0" SortIndex="40"/>-->
 		<!-- TURN_PHASE_TYPE TurnPhaseType-->

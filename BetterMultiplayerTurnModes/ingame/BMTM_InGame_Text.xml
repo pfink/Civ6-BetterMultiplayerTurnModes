@@ -16,8 +16,11 @@
 		<Row Tag="LOC_BMTM_NOT_YOUR_TURN" Language="en_US">
 			<Text>Military actions blocked, waiting for other players...</Text>
 		</Row>
-		<Row Tag="LOC_BMTM_REMAINING_ACTIONS" Language="de_DE">
-			<Text>Remaining Military Actions</Text>
+		<Row Tag="LOC_BMTM_YOUR_TURN" Language="en_US">
+			<Text>It's your turn to do military actions.</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_REMAINING_ACTIONS" Language="en_US">
+			<Text>Remaining Actions</Text>
 		</Row>
 		<Row Tag="LOC_BMTM_TURN" Language="de_DE">
 			<Text>Nächster BMTM Zug</Text>

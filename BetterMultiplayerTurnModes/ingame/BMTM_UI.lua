@@ -34,7 +34,7 @@ include("PopupDialog.lua");
 local singlePlayerTestingMode = true and not GameConfiguration.IsAnyMultiplayer();
 
 -- Settings
-local bmtm_Setting_MilitaryActionsPerTurn = 1;
+local bmtm_Setting_MilitaryActionsPerTurn = GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" and 999999 or GameConfiguration.GetValue("BMTM_MILITARY_ACTIONS_PER_BMTM_TURN") or 1;
 local bmtm_Setting_AttackerFirstStrikeBonusFactor = 2;
 local bmtm_Setting_MovementActionsPerTurn = 0;
 local bmtm_Setting_RotatoryMode = true;
@@ -45,6 +45,7 @@ local bmtm_RemainingMilitaryActions = {}; -- Table: PlayerID -> RemainingMilitar
 local bmtm_RemainingMovementActions = {}; -- Table: PlayerID -> RemainingMovementActions
 local bmtm_WarParticipants = {};		  -- Table: bmtmWarParticipantID -> PlayerID (contains players that are in war with local player + transitively/recursively all players who are in war with those players)
 local bmtm_WarParticipantsQueueIndex :number = 0;
+local bmtm_lastUnitMoved = {};
 
 local function Verbose(message)
    print(message);
@@ -56,7 +57,8 @@ Verbose("Start Initialization");
 local function RefreshUI()
 	local myRemainingActions = bmtm_RemainingMilitaryActions[Game.GetLocalPlayer()];
 	if myRemainingActions > 0 then
-		Controls.BMTMRemainingActions:SetText( Locale.Lookup("LOC_BMTM_REMAINING_ACTIONS") .. ": " ..  tostring(myRemainingActions));
+		local remainingActionsText = GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" and "" or (" " .. Locale.Lookup("LOC_BMTM_REMAINING_ACTIONS") .. ": " ..  tostring(myRemainingActions));
+		Controls.BMTMRemainingActions:SetText(Locale.Lookup("LOC_BMTM_YOUR_TURN") .. remainingActionsText);
 		Controls.BMTMNextTurnButton_Stack:SetHide(false);
 	else
 		Controls.BMTMRemainingActions:SetText( Locale.Lookup("LOC_BMTM_NOT_YOUR_TURN") );
@@ -190,13 +192,11 @@ local function Initialize(playerID:number, isHisTurn:boolean)
 end
 
 
-local function initNextTbsmTurn()
+local function initNextTbsmTurn()	
 	Verbose("Init next BMTM turn. Queue Index before:" .. bmtm_WarParticipantsQueueIndex);
+
+	bmtm_lastUnitMoved = {};
 	local i = 0;
-	Verbose(bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]);
-	Verbose(Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]);
-	Verbose(Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsHuman());
-	Verbose(Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsTurnActive());
 	-- Skip players who have ended their turn
 	while not Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsTurnActive()
 		  and Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsHuman()
@@ -232,6 +232,8 @@ local function consumeIfMilitaryAction(playerID:number, unitID:number)
 
 		if bmtm_RemainingMilitaryActions[playerID] == 0 then -- bmtm_RemainingMilitaryActions[playerID] <= 0 causes issues because sometimes one action calls the callback multiple times which will cause multiple turn changes. Anyhow, later on there could may be extra handling for values < 0 for safe fallback
 			initNextTbsmTurn(); --(playerID, false);
+		elseif Game.GetLocalPlayer() == playerID then
+			RefreshUI();
 		end
 	end
 end
@@ -278,7 +280,10 @@ end
 
 local function OnUnitMoved(playerID:number, unitID:number )
 	Verbose("BMTM: OnUnitMoved " .. unitID);
-	consumeIfMilitaryAction(playerID, unitID);
+	if bmtm_lastUnitMoved[playerID] ~= unitID then
+		bmtm_lastUnitMoved[playerID] = unitID;
+		consumeIfMilitaryAction(playerID, unitID);
+	end
 end
 
 function OnCombatVisBegin(combatMembers)	

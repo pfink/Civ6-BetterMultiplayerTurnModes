@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<LocalizedText>
+		<Row Tag="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Language="de_DE">
+			<Text>Militäraktionslimit</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN_DESC" Language="de_DE">
+			<Text>Die maximale Anzahl von Militäraktionen, die jede Kriegspartei durchführen kann, bevor das Spiel die Kontrolle über die Militäraktionen an den nächsten Spieler abgibt. Die Kontrolle über Militäraktionen geht solange reihum, bis jeder alle gewünschten Aktionen durchgeführt und seine Runde beendet hat.</Text>
+		</Row>
+	</LocalizedText>
+</GameData>

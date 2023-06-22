@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- AlarmClock_UI -->
-<!-- Author: Isaac Supeene -->
-<!-- DateCreated: 4/4/2020 1:32:55 PM -->
 <Context Name="BMTMContext">
 
 	<!-- Button on the top panel -->
 	<Stack					ID="BmtmSection"	StackGrowth="Left" Anchor="R,T" Padding="3">
 		<Container												Size="2,1" />
 		<Stack ID="BMTMNextTurnButton_Stack"	StackGrowth="Left" Anchor="R,T" Padding="0">
-			<Button ID="BMTMNextTurnButton" Size="29,29" Anchor="C,C" Texture="AlarmClock_Icon.dds" ToolTip="LOC_BMTM_TURN" ConsumeMouse="1"/>
+			<Button 		ID="BMTMNextTurnButton" Texture="SelectionPanel_Stat" Style="ButtonDisabledText" Size="28,32" Anchor="C,C" ToolTip="LOC_BMTM_TURN" ConsumeMouse="1">
+				<Image 		ID="UnitSkip" Icon="ICON_UNITOPERATION_SKIP_TURN" Size="20,20" Anchor="C,C" Offset="-1,-1"/>
+			</Button>
 		</Stack>
 		<Container												Size="2,1" />
 		<Stack				ID="BMTMInfoArea"				Anchor="R,T" Offset="14,8"		StackGrowth="Right" >

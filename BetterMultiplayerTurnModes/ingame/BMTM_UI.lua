@@ -1,12 +1,10 @@
 --[[
 TODOs:
 
-- Menu Configuration
-- Declare War: Clean Turn Queue Update
+- Icon
 - Testing
 
 - ... (or no military actions left)
-- (let attacker start war)
 - (Restrict Units based on GameInfo.Units)
 - (Allies)
 - (Optimize Queue)
@@ -17,6 +15,9 @@ TODOs:
 
 
 DONE
+- Menu Configuration
+- let attacker start war
+- Declare War: Clean Turn Queue Update
 - Give unlimited actions when oponent has ended turn
 - Initial Loading (Randomized)
 - Triangle Wars
@@ -35,10 +36,11 @@ local singlePlayerTestingMode = true and not GameConfiguration.IsAnyMultiplayer(
 
 -- Settings
 local bmtm_Setting_MilitaryActionsPerTurn = GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" and 999999 or GameConfiguration.GetValue("BMTM_MILITARY_ACTIONS_PER_BMTM_TURN") or 1;
-local bmtm_Setting_AttackerFirstStrikeBonusFactor = 2;
-local bmtm_Setting_MovementActionsPerTurn = 0;
-local bmtm_Setting_RotatoryMode = true;
-local bmtm_Setting_MilitaryActionsForMovementAllowed = true;
+local bmtm_Setting_RotatoryBmtmTurnStart = GameConfiguration.GetValue("BMTM_ROTATORY_BMTM_TURN_START") or singlePlayerTestingMode;
+--local bmtm_Setting_AttackerFirstStrikeBonusFactor = 2;
+--local bmtm_Setting_MovementActionsPerTurn = 0;
+--local bmtm_Setting_RotatoryMode = true;
+--local bmtm_Setting_MilitaryActionsForMovementAllowed = true;
 
 -- State
 local bmtm_RemainingMilitaryActions = {}; -- Table: PlayerID -> RemainingMilitaryActions
@@ -85,7 +87,7 @@ end
 -----------------
 
 
-local function initTbsmUI()
+local function initBmtmUI()
   Verbose("BMTM: AddButtonToTopPanel");
 
   local topPanel = ContextPtr:LookUpControl("/InGame/TopPanel/RightContents"); -- Top-right stack with Clock, Civilopedia, and Menu  
@@ -95,11 +97,11 @@ local function initTbsmUI()
   topPanel:ReprocessAnchoring();  
 end
 
-local function ShowTbsmUI()
+local function ShowBmtmUI()
   Controls.BmtmSection:SetHide(false);
 end
 
-local function HideTbsmUI()
+local function HideBmtmUI()
   Controls.BmtmSection:SetHide(true);
 end
 
@@ -192,32 +194,48 @@ local function Initialize(playerID:number, isHisTurn:boolean)
 end
 
 
-local function initNextTbsmTurn()	
+local function initNextBmtmTurn(isTurnStart)	
 	Verbose("Init next BMTM turn. Queue Index before:" .. bmtm_WarParticipantsQueueIndex);
 
 	bmtm_lastUnitMoved = {};
 	local i = 0;
 	-- Skip players who have ended their turn
-	while not Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsTurnActive()
+	while not isTurnStart
+		  and not Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsTurnActive()
 		  and Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsHuman()
 		  and i <= #bmtm_WarParticipants do
 		bmtm_WarParticipantsQueueIndex = (bmtm_WarParticipantsQueueIndex + 1) % #bmtm_WarParticipants;
 		i = i + 1;	
 	end
+	Verbose("Queue Index mid:" .. bmtm_WarParticipantsQueueIndex);
 	-- Initialize next BMTM turn
 	for i, iPlayer in ipairs(bmtm_WarParticipants) do
-		Verbose("War Participant ID:" .. i);
+		Verbose("War Participant ID:" .. i);		
 		Initialize(iPlayer, (i-1) == bmtm_WarParticipantsQueueIndex); -- Lua table index begins at 1, that's why we have to substract		
 	end	
 	bmtm_WarParticipantsQueueIndex = (bmtm_WarParticipantsQueueIndex + 1) % #bmtm_WarParticipants;
 	Verbose("Queue Index after:" .. bmtm_WarParticipantsQueueIndex);
 end
 
+local function setBmtmTurnQueueIndex(iTargetPlayer:number)
+	for i, iPlayer in ipairs(bmtm_WarParticipants) do
+		if(iTargetPlayer == iPlayer) then
+			bmtm_WarParticipantsQueueIndex = i-1;
+		end	
+	end	
+end
+
 local function initNextCivTurn()
 	--Game.GetLocalPlayer()
 	if isAtWarWithHumans(Game.GetLocalPlayer()) then
-		bmtm_WarParticipantsQueueIndex = Game.GetCurrentGameTurn() % #bmtm_WarParticipants;
-		initNextTbsmTurn();
+		if bmtm_Setting_RotatoryBmtmTurnStart then			
+			bmtm_WarParticipantsQueueIndex = Game.GetCurrentGameTurn() % #bmtm_WarParticipants;			
+		else
+			bmtm_WarParticipantsQueueIndex = 0;
+		end
+		Verbose("Set Queue Index: " .. bmtm_WarParticipantsQueueIndex);
+
+		initNextBmtmTurn(true);
 	end
 end
 
@@ -231,7 +249,7 @@ local function consumeIfMilitaryAction(playerID:number, unitID:number)
 		bmtm_RemainingMilitaryActions[playerID] = bmtm_RemainingMilitaryActions[playerID] - 1;
 
 		if bmtm_RemainingMilitaryActions[playerID] == 0 then -- bmtm_RemainingMilitaryActions[playerID] <= 0 causes issues because sometimes one action calls the callback multiple times which will cause multiple turn changes. Anyhow, later on there could may be extra handling for values < 0 for safe fallback
-			initNextTbsmTurn(); --(playerID, false);
+			initNextBmtmTurn(); --(playerID, false);
 		elseif Game.GetLocalPlayer() == playerID then
 			RefreshUI();
 		end
@@ -272,7 +290,7 @@ local function OnTopPanelButtonClick()
 		if iPlayer ~= Game.GetLocalPlayer() then
 			Network.SendChat(".bmtm_next_player", -2, iPlayer);
 		end
-		initNextTbsmTurn();
+		initNextBmtmTurn();
 	end
   end
   --ShowDialog();
@@ -298,15 +316,15 @@ end
 
 -- Callback when we load into the game for the first time
 local function OnLoadGameViewStateDone()
-	initTbsmUI();
+	initBmtmUI();
 	initWarParticipants();
 	Verbose("BMTM: War Participant Count " .. #bmtm_WarParticipants);
 	if #bmtm_WarParticipants > 0 then
 		initNextCivTurn(); -- TODO: Persistence
-		ShowTbsmUI();
+		ShowBmtmUI();
 		ContextPtr:SetHide(false);
 	else
-		HideTbsmUI();
+		HideBmtmUI();
 	end
 end
 
@@ -328,8 +346,9 @@ local function OnDiplomacyDeclareWar(actingPlayer:number, reactingPlayer:number)
   Verbose("BMTM: OnDiplomacyDeclareWar");  
   if isRelevantWar(actingPlayer, reactingPlayer) then
 	initWarParticipants();
-	initNextTbsmTurn(); --(actingPlayer, true);
-	ShowTbsmUI();
+	setBmtmTurnQueueIndex(actingPlayer);
+	initNextBmtmTurn();
+	ShowBmtmUI();
 	ContextPtr:SetHide(false);
   end
   
@@ -337,57 +356,73 @@ end
 
 local function OnDiplomacyMakePeace(actingPlayer:number, reactingPlayer:number)
 	if isRelevantWar(actingPlayer, reactingPlayer) then
+		local initNextTurn = false;
+
+		if isAtWarWithHumans(Game.GetLocalPlayer()) then
+			-- init next turn if it's the turn of one of the peace parties
+			for i, iPlayer in ipairs(bmtm_WarParticipants) do
+				if(bmtm_WarParticipantsQueueIndex == i-2 and (actingPlayer == iPlayer or reactingPlayer == iPlayer)) then
+					initNextTurn = true;
+				end
+			end
+		else
+			AllowAllMilitaryActions();
+			HideBmtmUI();
+		end	
+
 		initWarParticipants();
+		if initNextTurn then
+			initNextBmtmTurn();
+		end
 	end
-	if not isAtWarWithHumans(Game.GetLocalPlayer()) then
-		AllowAllMilitaryActions();
-		HideTbsmUI();
-	end	
+	
 end
 
 local function OnTurnBegin()
 	initNextCivTurn();
 end
 
-function OnPlayerTurnDeactivated( iPlayer:number )
-	if isAtWarWithHumans(Game.GetLocalPlayer()) and bmtm_RemainingMilitaryActions[iPlayer] > 0 then
-		initNextTbsmTurn();
+function OnPlayerTurnDeactivated(iPlayer:number)
+	if isAtWarWithHumans(Game.GetLocalPlayer()) and bmtm_RemainingMilitaryActions[iPlayer] ~= nil and bmtm_RemainingMilitaryActions[iPlayer] > 0 then
+		initNextBmtmTurn();
 	end
 end
 
 local function OnMultiplayerChat(fromPlayer, toPlayer, text, eTargetType)
 	Verbose("Next turn initialized manuallly" .. fromPlayer);
 	if string.lower(text) == ".bmtm_next_player" and bmtm_RemainingMilitaryActions[fromPlayer] > 0 then
-		initNextTbsmTurn();
+		initNextBmtmTurn();
 	end
 end
 
 ----------------
 -- Main Setup --
 ----------------
+if string.find(GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") or "", "BMTM") or singlePlayerTestingMode then
+	Verbose("BMTM activated");
 
-Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone);
-Events.DiplomacyDeclareWar.Add(OnDiplomacyDeclareWar);
-Events.DiplomacyMakePeace.Add(OnDiplomacyMakePeace);
-Events.TurnBegin.Add(OnTurnBegin);
-Events.PlayerTurnDeactivated.Add(OnPlayerTurnDeactivated);
+	Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone);
+	Events.DiplomacyDeclareWar.Add(OnDiplomacyDeclareWar);
+	Events.DiplomacyMakePeace.Add(OnDiplomacyMakePeace);
+	Events.TurnBegin.Add(OnTurnBegin);
+	Events.PlayerTurnDeactivated.Add(OnPlayerTurnDeactivated);
+	Events.UnitMoved.Add(OnUnitMoved);
+	--Events.UnitSelectionChanged.Add(OnUnitSelectionChanged);
+	Events.CombatVisBegin.Add(OnCombatVisBegin);
+	Events.MultiplayerChat.Add(OnMultiplayerChat);
+	--Events.UnitOperationStarted.Add(OnUnitOperationStarted);
 
---Events.UnitSelectionChanged.Add(OnUnitSelectionChanged);
-Events.CombatVisBegin.Add(OnCombatVisBegin);
-Events.MultiplayerChat.Add(OnMultiplayerChat);
---Events.UnitOperationStarted.Add(OnUnitOperationStarted);
+	--LuaEvents.BmtmNextTurnInitializedManually.Add(OnBmtmNextTurnInitializedManually)
+	ContextPtr:SetInputHandler(InputHandler, true);
 
---LuaEvents.TbsmNextTurnInitializedManually.Add(OnTbsmNextTurnInitializedManually)
-ContextPtr:SetInputHandler(InputHandler, true);
+	Controls.BMTMNextTurnButton:RegisterCallback(Mouse.eLClick, OnTopPanelButtonClick);
 
-Controls.BMTMNextTurnButton:RegisterCallback(Mouse.eLClick, OnTopPanelButtonClick);
+	--ActivateInputFiltering();
+	--EnableTutorialCheck();
 
-ActivateInputFiltering();
-EnableTutorialCheck();
+end
 
 
-
-Events.UnitMoved.Add(OnUnitMoved);
 
 --Events.PlayerTurnActivated.Add(OnPlayerTurnActivated);
 

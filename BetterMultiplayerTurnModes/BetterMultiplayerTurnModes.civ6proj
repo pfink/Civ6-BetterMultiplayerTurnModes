@@ -20,7 +20,8 @@
             <File>setup/BMTM_Config.xml</File>
           </UpdateDatabase>		
           <UpdateText id="BMTM_SETUP_TEXT">
-              <File>setup/BMTM_Setup_Text.xml</File>
+              <File>setup/BMTM_Setup_Text_EN.xml</File>
+              <File>setup/BMTM_Setup_Text_DE.xml</File>
           </UpdateText>    
       </FrontEndActions>
       ]]></FrontEndActionData>
@@ -33,13 +34,6 @@
           </Properties>
           <File>ingame/BMTM_UI.xml</File>
         </AddUserInterfaces>
-        <ImportFiles id="LoadAlarmClockIcon">
-          <Properties>
-            <Context>InGame</Context>
-            <LoadOrder>400</LoadOrder>
-          </Properties>
-          <File>ingame/AlarmClock_Icon.dds</File>
-        </ImportFiles>
         <UpdateText id="Text">
           <File>ingame/BMTM_InGame_Text.xml</File>
         </UpdateText>
@@ -52,9 +46,6 @@
     <OutputPath>.</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="ingame\AlarmClock_Icon.dds">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="ingame\BMTM_InGame_Text.xml">
       <SubType>Content</SubType>
     </Content>
@@ -64,10 +55,13 @@
     <Content Include="ingame\BMTM_UI.xml">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="setup\BMTM_Setup_Text.xml">
+    <Content Include="setup\BMTM_Setup_Text_EN.xml">
       <SubType>Content</SubType>
     </Content>
     <Content Include="setup\BMTM_Config.xml">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="setup\BMTM_Setup_Text_DE.xml">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

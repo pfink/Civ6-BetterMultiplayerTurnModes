@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
 	<LocalizedText>
-		<Row Tag="LOC_BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ" Language="en_US">
+		<Row Tag="LOC_BMTM_TURNPHASE_DYN_SIM_MULTI" Language="en_US">
 			<Text>Dynamic Simultaneous Multi-Turns [Beta]</Text>
 		</Row>
-		<Row Tag="LOC_BMTM_TURNPHASE_CIVIL_SIM_MILITARY_SEQ_DESC" Language="en_US">
-			<Text>Players at peace take their turns at the same time. Players at war take their civil actions at the same time, but their military actions sequentially (multiple times per turn). Military units cannot attack or move while another player has the control over his military actions, but civil actions are still possible while other players do their military actions. Every war participant has a limited budget of military actions. When it's exhausted, the control over military actions is passed on to the next player. The control over military actions is passed on over and over again until everybody has done all military actions he wants to do and ended his turn. "Multi-Turn" means that war participants will often get control over their military units multiple times per turn in case the budget is not sufficient to do all necessary actions at once, so their may will be an exchange of military strikes between players multiple times per turn. This is the recommended BMTM turn mode as it adds more tactical deepness to warfare between players, as the decision which military actions they do first within a turn will may have an impact on the war outcome. Also, it accelerates war pacing because wait times will be shorter until the next military actions can be done.</Text>
+		<Row Tag="LOC_BMTM_TURNPHASE_DYN_SIM_MULTI_DESC" Language="en_US">
+			<Text>Players at peace take their turns at the same time. Players at war take their civil actions at the same time, but their military actions sequentially (multiple times per turn). Military units cannot attack or move while another player has the control over his military actions, but civil actions are still possible while other players do their military actions. Every war participant has a limited budget of military actions. When it's exhausted, the control over military actions is passed on to the next player. The control over military actions is passed on over and over again until everybody has done all military actions he wants to do and ended his turn. "Multi-Turn" means that war participants will often get control over their military units multiple times per turn in case the budget is not sufficient to do all necessary actions at once, so their may will be an exchange of military strikes between players multiple times per turn. This is the recommended BMTM turn mode as it adds more tactical depth to warfare between players, as the decision which military actions they do first within a turn will may have an impact on the war outcome. Also, it accelerates war pacing because wait times will be shorter until the next military actions can be done.</Text>
 		</Row>
 		<Row Tag="LOC_BMTM_TURNPHASE_DYN_SIM_SINGLE" Language="en_US">
 			<Text>Dynamic Simultaneous Single-Turns [Beta]</Text>
@@ -22,14 +22,14 @@
 		<Row Tag="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Language="en_US">
 			<Text>Military Action Limit</Text>
 		</Row>
-		<Row Tag="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Language="de_DE">
-			<Text>Militäraktionslimit</Text>
-		</Row>
 		<Row Tag="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN_DESC" Language="en_US">
 			<Text>The maximum number of military actions each war participant can do before the game hands-over the control of military actions to the next player. The control over military actions is going in turn over and over again until everybody has done all military actions he wants to do and ended his turn.</Text>
 		</Row>
-		<Row Tag="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN_DESC" Language="de_DE">
-			<Text>Die maximale Anzahl von Militäraktionen, die jede Kriegspartei durchführen kann, bevor das Spiel die Kontrolle über die Militäraktionen an den nächsten Spieler abgibt. Die Kontrolle über Militäraktionen geht solange reihum, bis jeder alle gewünschten Aktionen durchgeführt und seine Runde beendet hat.</Text>
+		<Row Tag="LOC_BMTM_ROTATORY_BMTM_TURN_START" Language="en_US">
+			<Text>Rotary Military Action Turn Start</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_ROTATORY_BMTM_TURN_START_DESC" Language="en_US">
+			<Text>Defines whether the player who can do military actions first will be changing on each turn. This option is fine for the Dynamic Simultaneous Multi-Turns mode, but not recommended for the Dynamic Simultaneous Single-Turns mode. In both turn modes, it can lead to the situation that people can attack 2 times in a row. Anyhow, in Dynamic Simultaneous Multi-Turns mode, players can influence whether that could happen by deciding whether they'll attack first or let the other player attack first.</Text>
 		</Row>
 	</LocalizedText>
 </GameData>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<LocalizedText>
+		<Row Tag="LOC_BMTM_TURN" Language="de_DE">
+			<Text>Gibt die Kontrolle über Militäraktionen an den nächsten Spieler ab</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_NOT_YOUR_TURN" Language="de_DE">
+			<Text>Militäraktionen blockiert, warte auf andere Spieler...</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_YOUR_TURN" Language="de_DE">
+			<Text>Du bist am Zug, Militäraktionen durchzuführen.</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_REMAINING_ACTIONS" Language="de_DE">
+			<Text>Verbleibende Aktionen</Text>
+		</Row>
+	</LocalizedText>
+</GameData>

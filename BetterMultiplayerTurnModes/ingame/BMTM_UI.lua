@@ -1,9 +1,6 @@
 --[[
 TODOs:
 
-- Icon
-- Testing
-
 - ... (or no military actions left)
 - (Restrict Units based on GameInfo.Units)
 - (Allies)
@@ -15,6 +12,8 @@ TODOs:
 
 
 DONE
+- Icon
+- Testing
 - Menu Configuration
 - let attacker start war
 - Declare War: Clean Turn Queue Update
@@ -32,7 +31,7 @@ include("TutorialUIRoot.lua");
 include("PopupDialog.lua");
 
 -- Debugging
-local singlePlayerTestingMode = true and not GameConfiguration.IsAnyMultiplayer();
+local singlePlayerTestingMode = false and not GameConfiguration.IsAnyMultiplayer();
 
 -- Settings
 local bmtm_Setting_MilitaryActionsPerTurn = GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" and 999999 or GameConfiguration.GetValue("BMTM_MILITARY_ACTIONS_PER_BMTM_TURN") or 1;
@@ -147,6 +146,7 @@ local function ForbidAllMilitaryActions()
 			LuaEvents.Tutorial_AddUnitHexRestriction(unitType, {});
 			AddMapUnitMoveRestriction(unitType);
 			DisableUnitAction("UNITOPERATION_MOVE_TO", unitType);
+			DisableUnitAction("UNITOPERATION_SWAP_UNITS", unitType);
 			DisableUnitAction("UNITOPERATION_MOVE_TO_UNIT", unitType);
 			DisableUnitAction("UNITOPERATION_AIR_ATTACK", unitType);
 			DisableUnitAction("UNITOPERATION_COASTAL_RAID", unitType);
@@ -199,6 +199,7 @@ local function initNextBmtmTurn(isTurnStart)
 
 	bmtm_lastUnitMoved = {};
 	local i = 0;
+	bmtm_WarParticipantsQueueIndex = bmtm_WarParticipantsQueueIndex % #bmtm_WarParticipants; -- Fix index in case of lost war members
 	-- Skip players who have ended their turn
 	while not isTurnStart
 		  and not Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsTurnActive()
@@ -355,24 +356,23 @@ local function OnDiplomacyDeclareWar(actingPlayer:number, reactingPlayer:number)
 end
 
 local function OnDiplomacyMakePeace(actingPlayer:number, reactingPlayer:number)
+	Verbose("BMTM: Make Peace. Acting: " .. actingPlayer .. " Reacting: " .. reactingPlayer);
 	if isRelevantWar(actingPlayer, reactingPlayer) then
-		local initNextTurn = false;
+		local Old_WarParticipants = bmtm_WarParticipants;
+
+		initWarParticipants();
 
 		if isAtWarWithHumans(Game.GetLocalPlayer()) then
 			-- init next turn if it's the turn of one of the peace parties
-			for i, iPlayer in ipairs(bmtm_WarParticipants) do
-				if(bmtm_WarParticipantsQueueIndex == i-2 and (actingPlayer == iPlayer or reactingPlayer == iPlayer)) then
-					initNextTurn = true;
+			for i, iPlayer in ipairs(Old_WarParticipants) do
+				Verbose("i" .. i .. " P" .. iPlayer .. " Ind" .. bmtm_WarParticipantsQueueIndex);				 
+				if((bmtm_WarParticipantsQueueIndex - 1) % #Old_WarParticipants == i-1 and (actingPlayer == iPlayer or reactingPlayer == iPlayer) and not table_contains(bmtm_WarParticipants, iPlayer)) then
+					initNextBmtmTurn();
 				end
 			end
 		else
 			AllowAllMilitaryActions();
 			HideBmtmUI();
-		end	
-
-		initWarParticipants();
-		if initNextTurn then
-			initNextBmtmTurn();
 		end
 	end
 	
@@ -388,9 +388,9 @@ function OnPlayerTurnDeactivated(iPlayer:number)
 	end
 end
 
-local function OnMultiplayerChat(fromPlayer, toPlayer, text, eTargetType)
-	Verbose("Next turn initialized manuallly" .. fromPlayer);
+local function OnMultiplayerChat(fromPlayer, toPlayer, text, eTargetType)	
 	if string.lower(text) == ".bmtm_next_player" and bmtm_RemainingMilitaryActions[fromPlayer] > 0 then
+		Verbose("Next turn initialized manuallly" .. fromPlayer);
 		initNextBmtmTurn();
 	end
 end
@@ -398,6 +398,8 @@ end
 ----------------
 -- Main Setup --
 ----------------
+Verbose("Turn Mode: " .. (GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") or ""));
+
 if string.find(GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") or "", "BMTM") or singlePlayerTestingMode then
 	Verbose("BMTM activated");
 

@@ -5,9 +5,9 @@
     <Name>Better Multiplayer Turn Modes</Name>
     <Guid>db2d862d-df4e-4718-9565-508a37c29f81</Guid>
     <ProjectGuid>67da609f-0420-464b-91ef-6c3552627846</ProjectGuid>
-    <ModVersion>1</ModVersion>
+    <ModVersion>90</ModVersion>
     <Teaser>This mod adds more turn modes for Internet Multiplayer Games.</Teaser>
-    <Description>This mod adds more turn modes for Internet Multiplayer Games.</Description>
+    <Description>This mod adds more turn modes for Internet Multiplayer Games. Version: 0.9.0</Description>
     <Authors>Patrick Fink</Authors>
     <AffectsSavedGames>false</AffectsSavedGames>
     <SupportsSinglePlayer>true</SupportsSinglePlayer>
@@ -35,7 +35,8 @@
           <File>ingame/BMTM_UI.xml</File>
         </AddUserInterfaces>
         <UpdateText id="Text">
-          <File>ingame/BMTM_InGame_Text.xml</File>
+          <File>ingame/BMTM_InGame_Text_EN.xml</File>
+          <File>ingame/BMTM_InGame_Text_DE.xml</File>
         </UpdateText>
       </InGameActions>
       ]]></InGameActionData>
@@ -46,13 +47,16 @@
     <OutputPath>.</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="ingame\BMTM_InGame_Text.xml">
+    <Content Include="ingame\BMTM_InGame_Text_EN.xml">
       <SubType>Content</SubType>
     </Content>
     <Content Include="ingame\BMTM_UI.lua">
       <SubType>Content</SubType>
     </Content>
     <Content Include="ingame\BMTM_UI.xml">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ingame\BMTM_InGame_Text_DE.xml">
       <SubType>Content</SubType>
     </Content>
     <Content Include="setup\BMTM_Setup_Text_EN.xml">

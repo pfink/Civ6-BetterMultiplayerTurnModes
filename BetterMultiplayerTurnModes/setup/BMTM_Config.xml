@@ -6,7 +6,7 @@
 	<Parameters>
 		<!-- Game / Map Options -->
 		<Row ParameterId="TurnPhaseType" Visible="0" Name="LOC_GAME_TURNPHASE_TYPE" Description="LOC_GAME_TURNPHASE_DESC" Domain="StandardTurnPhases" Hash="1" DefaultValue="TURNPHASE_SIMULTANEOUS" ConfigurationGroup="Game" ConfigurationId="TURN_PHASE_TYPE" GroupId="GameOptions" SupportsSinglePlayer="0" SupportsHotSeat="0" SupportsPlayByCloud="0" ChangeableAfterGameStart="0" SortIndex="40" />
-		<Row ParameterId="BMTM_TurnPhaseType" Name="LOC_GAME_TURNPHASE_TYPE" Description="LOC_GAME_TURNPHASE_DESC" Domain="BMTMTurnPhases" Hash="1" DefaultValue="BMTM_TURNPHASE_DYN_SIM_MULTI" ConfigurationGroup="Game" ConfigurationId="BMTM_TURN_PHASE_TYPE" GroupId="GameOptions" SupportsSinglePlayer="0" SupportsHotSeat="0" SupportsPlayByCloud="0" ChangeableAfterGameStart="1" SortIndex="40" />
+		<Row ParameterId="BMTM_TurnPhaseType" Name="LOC_GAME_TURNPHASE_TYPE" Description="LOC_GAME_TURNPHASE_DESC" Domain="BMTMTurnPhases" Hash="0" DefaultValue="BMTM_TURNPHASE_DYN_SIM_MULTI" ConfigurationGroup="Game" ConfigurationId="BMTM_TURN_PHASE_TYPE" GroupId="GameOptions" SupportsSinglePlayer="0" SupportsHotSeat="0" SupportsPlayByCloud="0" ChangeableAfterGameStart="1" SortIndex="40" />
 		<Row ParameterId="BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Name="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Description="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN_DESC" Domain="uint" Hash="0" DefaultValue="4" ConfigurationGroup="Game" ConfigurationId="BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" GroupId="GameOptions" ChangeableAfterGameStart="1" SortIndex="41"/>
 
 		<!-- Advanced Options -->

@@ -1,11 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
 	<LocalizedText>
+		<Row Tag="LOC_BMTM_TURNPHASE_DYN_SIM_MULTI" Language="de_DE">
+			<Text>Dynamisch-Simultane Multi-Runden [Beta]</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_TURNPHASE_DYN_SIM_MULTI_DESC" Language="de_DE">
+			<Text>Spieler, die sich im Frieden befinden, spielen ihre Züge gleichzeitig. Spieler, die sich im Krieg befinden, führen ihre zivilen Aktionen gleichzeitig durch, aber ihre militärischen Aktionen nacheinander (ggf. mehrfach pro Runde). Militäreinheiten können nicht angreifen oder sich bewegen, während ein anderer Spieler die Kontrolle über seine Militäraktionen hat, aber zivile Aktionen sind weiterhin möglich während andere Spieler ihre Militäraktionen durchführen. Jeder Kriegsteilnehmer hat ein begrenztes Budget für militärische Aktionen. Wenn dieses aufgebraucht ist, wird die Kontrolle über die militärischen Aktionen an den nächsten Spieler weitergegeben. Die Kontrolle über die Militäraktionen wird immer wieder weitergegeben, bis jeder alle Militäraktionen durchgeführt hat, die er durchführen möchte, und sein Zug beendet ist. "Multi-Runden" bedeutet, dass die Kriegsteilnehmer oft mehrmals pro Runde die Kontrolle über ihre Militäreinheiten erhalten, falls das Budget nicht ausreicht, um alle notwendigen Aktionen auf einmal durchzuführen, so dass es mehrmals pro Runde zu einem militärischen Schlagabtausch zwischen den Spielern kommen kann. Dies ist der empfohlene BMTM-Rundenmodus, weil er der Kriegsführung zwischen den Spielern mehr taktische Tiefe verleiht (da die Entscheidung, welche Militäraktionen sie innerhalb einer Runde zuerst durchführen, einen Einfluss auf den Ausgang des Krieges haben kann). Außerdem wird das gefühlte Spieltempo beschleunigt, da die Wartezeiten bis zur nächsten durchführbaren Militäraktion kürzer werden.
+			</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_TURNPHASE_DYN_SIM_SINGLE" Language="de_DE">
+			<Text>Dynamisch-Simultane Einzel-Runden [Beta]</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_TURNPHASE_DYN_SIM_SINGLE_DESC" Language="de_DE">
+			<Text>Spieler, die sich im Frieden befinden, spielen ihre Züge gleichzeitig. Spieler, die sich im Krieg befinden, führen ihre zivilen Aktionen gleichzeitig durch, aber ihre militärischen Aktionen nacheinander. Militäreinheiten können nicht angreifen oder sich bewegen, während ein anderer Spieler die Kontrolle über seine Militäraktionen hat, aber zivile Aktionen sind weiterhin möglich während andere Spieler ihre Militäraktionen durchführen. Jeder Kriegsteilnehmer führt alle seine Militäraktionen in einem Durchgang aus und hat die Kontrolle über seine Militäraktionen nur einmal pro Zug, bis er sich entscheidet, die militärische Kontrolle an den nächsten Spieler zu übergeben oder seinen Zug beendet.
+			</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_TURNPHASE_TWOPHASE" Language="de_DE">
+			<Text>Dynamische 2-Phasen-Runden [Unsupported]</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_TURNPHASE_TWOPHASE_DESC" Language="de_DE">
+			<Text>Spieler im Frieden machen ihre Züge gleichzeitig. Spieler im Krieg durchlaufen zwei Zugphasen: Zuerst führen sie ihre militärischen Aktionen der Reihe nach durch. Nachdem alle Spieler im Krieg ihre militärischen Aktionen abgeschlossen haben, treten sie in die Phase der zivilen Aktionen nach dem Krieg ein. Dieser Rundenmodus wurde von Firaxis im Code des Core-Quellcodes implementiert, aber den Spielern nicht zugänglich gemachen. Der BMTM-Mod hat diesen versteckten Modus aktiviert, aber er ist nicht getestet und wird nicht unterstützt. Die Implementierung dieses Runden-Modus ist für Modder nicht zugänglich, was bedeutet, dass mögliche Fehler nicht durch den BMTM-Mod behoben werden können.
+			</Text>
+		</Row>
 		<Row Tag="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN" Language="de_DE">
 			<Text>Militäraktionslimit</Text>
 		</Row>
 		<Row Tag="LOC_BMTM_MILITARY_ACTIONS_PER_BMTM_TURN_DESC" Language="de_DE">
 			<Text>Die maximale Anzahl von Militäraktionen, die jede Kriegspartei durchführen kann, bevor das Spiel die Kontrolle über die Militäraktionen an den nächsten Spieler abgibt. Die Kontrolle über Militäraktionen geht solange reihum, bis jeder alle gewünschten Aktionen durchgeführt und seine Runde beendet hat.</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_ROTATORY_BMTM_TURN_START" Language="de_DE">
+			<Text>Rotierender Startspieler für Militäraktionen</Text>
+		</Row>
+		<Row Tag="LOC_BMTM_ROTATORY_BMTM_TURN_START_DESC" Language="de_DE">
+			<Text>Legt fest, ob der Spieler, der zuerst militärische Aktionen durchführen kann, in jedem Zug wechselt. Diese Option ist gut für den Modus "Dynamisch-Simultane Multi-Runden", aber nicht empfehlenswert für den Modus "Dynamisch-Simultane Einzel-Runden". In beiden Runden-Modi kann es dazu führen, dass Spieler 2 Mal hintereinander angreifen können. Im Modus "Dynamisch-Simultane Multi-Runden" können die Spieler jedoch beeinflussen, ob das passieren kann, indem sie entscheiden, ob sie zuerst angreifen oder den anderen Spieler zuerst angreifen lassen.</Text>
 		</Row>
 	</LocalizedText>
 </GameData>

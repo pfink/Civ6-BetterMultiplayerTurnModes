@@ -153,7 +153,8 @@ local function ForbidAllMilitaryActions()
 			DisableUnitAction("UNITOPERATION_WMD_STRIKE", unitType);
 			DisableUnitAction("UNITOPERATION_UPGRADE", unitType);
 			DisableUnitAction("UNITOPERATION_EMBARK", unitType);
-			DisableUnitAction("UNITOPERATION_DISEMBARK", unitType); 
+			DisableUnitAction("UNITOPERATION_DISEMBARK", unitType);
+			DisableUnitAction("UNITCOMMAND_PROMOTE", unitType);
 		end
 	end
 end
@@ -174,7 +175,8 @@ local function AllowAllMilitaryActions()
 			EnableUnitAction("UNITOPERATION_WMD_STRIKE", unitType);
 			EnableUnitAction("UNITOPERATION_UPGRADE", unitType);
 			EnableUnitAction("UNITOPERATION_EMBARK", unitType);
-			EnableUnitAction("UNITOPERATION_DISEMBARK", unitType); 
+			EnableUnitAction("UNITOPERATION_DISEMBARK", unitType);
+			EnableUnitAction("UNITCOMMAND_PROMOTE",	unitType);
 		end
 	end
 end

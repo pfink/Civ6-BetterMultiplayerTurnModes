@@ -33,6 +33,22 @@ include("PopupDialog.lua");
 -- Debugging
 local singlePlayerTestingMode = false and not GameConfiguration.IsAnyMultiplayer();
 
+-- Constants
+local bmtm_MilitaryUnitOperationsList = {	"UNITOPERATION_MOVE_TO",
+											"UNITOPERATION_MOVE_TO_UNIT",
+											"UNITOPERATION_SWAP_UNITS",
+											"UNITOPERATION_RANGE_ATTACK",
+											"UNITOPERATION_AUTOMATE_EXPLORE",											
+											"UNITOPERATION_PILLAGE",
+											"UNITOPERATION_AIR_ATTACK",
+											"UNITOPERATION_COASTAL_RAID",
+											"UNITOPERATION_WMD_STRIKE",
+											"UNITOPERATION_UPGRADE",
+											"UNITOPERATION_EMBARK",
+											"UNITOPERATION_DISEMBARK",
+											"UNITCOMMAND_PROMOTE"
+										};
+
 -- Settings
 local bmtm_Setting_MilitaryActionsPerTurn = GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" and 999999 or GameConfiguration.GetValue("BMTM_MILITARY_ACTIONS_PER_BMTM_TURN") or 1;
 local bmtm_Setting_RotatoryBmtmTurnStart = GameConfiguration.GetValue("BMTM_ROTATORY_BMTM_TURN_START") or singlePlayerTestingMode;
@@ -145,16 +161,10 @@ local function ForbidAllMilitaryActions()
 		if unitIsMilitary(unit) then 
 			LuaEvents.Tutorial_AddUnitHexRestriction(unitType, {});
 			AddMapUnitMoveRestriction(unitType);
-			DisableUnitAction("UNITOPERATION_MOVE_TO", unitType);
-			DisableUnitAction("UNITOPERATION_SWAP_UNITS", unitType);
-			DisableUnitAction("UNITOPERATION_MOVE_TO_UNIT", unitType);
-			DisableUnitAction("UNITOPERATION_AIR_ATTACK", unitType);
-			DisableUnitAction("UNITOPERATION_COASTAL_RAID", unitType);
-			DisableUnitAction("UNITOPERATION_WMD_STRIKE", unitType);
-			DisableUnitAction("UNITOPERATION_UPGRADE", unitType);
-			DisableUnitAction("UNITOPERATION_EMBARK", unitType);
-			DisableUnitAction("UNITOPERATION_DISEMBARK", unitType);
-			DisableUnitAction("UNITCOMMAND_PROMOTE", unitType);
+			for k, op in pairs(bmtm_MilitaryUnitOperationsList) do
+			  DisableUnitAction(op, unitType);
+			end
+			
 		end
 	end
 end
@@ -168,15 +178,9 @@ local function AllowAllMilitaryActions()
 		if unitIsMilitary(unit) then 
 			LuaEvents.Tutorial_AddUnitHexRestriction(unitType, {});
 			RemoveMapUnitMoveRestriction(unitType);
-			EnableUnitAction("UNITOPERATION_MOVE_TO", unitType);
-			EnableUnitAction("UNITOPERATION_MOVE_TO_UNIT", unitType);
-			EnableUnitAction("UNITOPERATION_AIR_ATTACK", unitType);
-			EnableUnitAction("UNITOPERATION_COASTAL_RAID", unitType);
-			EnableUnitAction("UNITOPERATION_WMD_STRIKE", unitType);
-			EnableUnitAction("UNITOPERATION_UPGRADE", unitType);
-			EnableUnitAction("UNITOPERATION_EMBARK", unitType);
-			EnableUnitAction("UNITOPERATION_DISEMBARK", unitType);
-			EnableUnitAction("UNITCOMMAND_PROMOTE",	unitType);
+			for k, op in pairs(bmtm_MilitaryUnitOperationsList) do
+			  EnableUnitAction(op, unitType);
+			end
 		end
 	end
 end

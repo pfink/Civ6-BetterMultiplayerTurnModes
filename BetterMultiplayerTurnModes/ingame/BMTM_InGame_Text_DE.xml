@@ -13,5 +13,8 @@
 		<Row Tag="LOC_BMTM_REMAINING_ACTIONS" Language="de_DE">
 			<Text>Verbleibende Aktionen</Text>
 		</Row>
+		<Row Tag="LOC_BMTM_REMAINING_TIME" Language="de_DE">
+			<Text>Verbleibende Zeit</Text>
+		</Row>
 	</LocalizedText>
 </GameData>

@@ -1,7 +1,6 @@
 --[[
 TODOs:
-
-- ... (or no military actions left)
+- Multi-Turn Mode: End BMTM turn when no military actions left
 - (Restrict Units based on GameInfo.Units)
 - (Allies)
 - (Optimize Queue)
@@ -9,30 +8,19 @@ TODOs:
 - (Limited Simoultanous Mode)
 - (Bonus Movement Points)
 - (First Strike Bonus)
-
-
-DONE
-- Icon
-- Testing
-- Menu Configuration
-- let attacker start war
-- Declare War: Clean Turn Queue Update
-- Give unlimited actions when oponent has ended turn
-- Initial Loading (Randomized)
-- Triangle Wars
-- Switch beginning player each Civ turn
-- Re-enable military actions when count goes > 0
-- Continue button
-- Peace
 --]]
 
 
 include("TutorialUIRoot.lua");
 include("PopupDialog.lua");
+include( "Civ6Common" );
 
 -- Debugging
 local singlePlayerTestingMode = false and not GameConfiguration.IsAnyMultiplayer();
-
+if singlePlayerTestingMode then
+	GameConfiguration.SetValue("BMTM_TURN_PHASE_TYPE", "BMTM_TURNPHASE_DYN_SIM_SINGLE");
+	GameConfiguration.SetValue("BMTM_ROTATORY_BMTM_TURN_START", false);
+end
 -- Constants
 local bmtm_MilitaryUnitOperationsList = {	"UNITOPERATION_MOVE_TO",
 											"UNITOPERATION_MOVE_TO_UNIT",
@@ -51,7 +39,7 @@ local bmtm_MilitaryUnitOperationsList = {	"UNITOPERATION_MOVE_TO",
 
 -- Settings
 local bmtm_Setting_MilitaryActionsPerTurn = GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" and 999999 or GameConfiguration.GetValue("BMTM_MILITARY_ACTIONS_PER_BMTM_TURN") or 1;
-local bmtm_Setting_RotatoryBmtmTurnStart = GameConfiguration.GetValue("BMTM_ROTATORY_BMTM_TURN_START") or singlePlayerTestingMode;
+local bmtm_Setting_RotatoryBmtmTurnStart = GameConfiguration.GetValue("BMTM_ROTATORY_BMTM_TURN_START");
 --local bmtm_Setting_AttackerFirstStrikeBonusFactor = 2;
 --local bmtm_Setting_MovementActionsPerTurn = 0;
 --local bmtm_Setting_RotatoryMode = true;
@@ -60,9 +48,12 @@ local bmtm_Setting_RotatoryBmtmTurnStart = GameConfiguration.GetValue("BMTM_ROTA
 -- State
 local bmtm_RemainingMilitaryActions = {}; -- Table: PlayerID -> RemainingMilitaryActions
 local bmtm_RemainingMovementActions = {}; -- Table: PlayerID -> RemainingMovementActions
-local bmtm_WarParticipants = {};		  -- Table: bmtmWarParticipantID -> PlayerID (contains players that are in war with local player + transitively/recursively all players who are in war with those players)
+local bmtm_WarParticipants = {};		  -- Table: bmtmWarParticipantID (index) -> PlayerID (contains players that are in war with local player + transitively/recursively all players who are in war with those players)
 local bmtm_WarParticipantsQueueIndex :number = 0;
 local bmtm_lastUnitMoved = {};
+
+local bmtm_remainingTime = nil;
+local bmtm_TurnTimePerPlayer = 0;
 
 local function Verbose(message)
    print(message);
@@ -70,25 +61,12 @@ end
 
 Verbose("Start Initialization");
 
-
-local function RefreshUI()
-	local myRemainingActions = bmtm_RemainingMilitaryActions[Game.GetLocalPlayer()];
-	if myRemainingActions > 0 then
-		local remainingActionsText = GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" and "" or (" " .. Locale.Lookup("LOC_BMTM_REMAINING_ACTIONS") .. ": " ..  tostring(myRemainingActions));
-		Controls.BMTMRemainingActions:SetText(Locale.Lookup("LOC_BMTM_YOUR_TURN") .. remainingActionsText);
-		Controls.BMTMNextTurnButton_Stack:SetHide(false);
-	else
-		Controls.BMTMRemainingActions:SetText( Locale.Lookup("LOC_BMTM_NOT_YOUR_TURN") );
-		Controls.BMTMNextTurnButton_Stack:SetHide(true);
-	end
-end
-
 -----------------
 -- Utility --
 -----------------
 
 
-function table_contains(table, element)
+local function table_contains(table, element)
   for _, value in pairs(table) do
     if value == element then
       return true
@@ -97,10 +75,42 @@ function table_contains(table, element)
   return false
 end
 
+local function table_getIndexFromElement(table, element)
+	for i, v in ipairs(table) do
+		if v == element then
+			return i
+		end
+	end
+end
+
+
 -----------------
 -- UI Mutators --
 -----------------
 
+
+local function RefreshUI()
+	local myRemainingActions = bmtm_RemainingMilitaryActions[Game.GetLocalPlayer()];
+	local remainingText = "";
+	if myRemainingActions > 0 then
+		if GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" then
+			if bmtm_remainingTime ~= nil then
+				remainingText = (" " .. Locale.Lookup("LOC_BMTM_REMAINING_TIME") .. ": " ..  FormatTimeRemaining(bmtm_remainingTime, true));
+			end
+		else
+			remainingText =  (" " .. Locale.Lookup("LOC_BMTM_REMAINING_ACTIONS") .. ": " ..  tostring(myRemainingActions));
+		end
+		
+		Controls.BMTMRemainingActions:SetText(Locale.Lookup("LOC_BMTM_YOUR_TURN") .. remainingText);
+		Controls.BMTMNextTurnButton_Stack:SetHide(false);
+	else 		
+		if bmtm_remainingTime ~= nil and bmtm_WarParticipantsQueueIndex ~= 0 and bmtm_WarParticipantsQueueIndex <= table_getIndexFromElement(bmtm_WarParticipants, Game.GetLocalPlayer()) then
+			remainingText = (" " .. Locale.Lookup("LOC_BMTM_REMAINING_TIME") .. ": " ..  FormatTimeRemaining(bmtm_remainingTime, false));
+		end
+		Controls.BMTMRemainingActions:SetText( Locale.Lookup("LOC_BMTM_NOT_YOUR_TURN") .. remainingText);
+		Controls.BMTMNextTurnButton_Stack:SetHide(true);
+	end
+end
 
 local function initBmtmUI()
   Verbose("BMTM: AddButtonToTopPanel");
@@ -200,28 +210,31 @@ local function Initialize(playerID:number, isHisTurn:boolean)
 end
 
 
-local function initNextBmtmTurn(isTurnStart)	
-	Verbose("Init next BMTM turn. Queue Index before:" .. bmtm_WarParticipantsQueueIndex);
+local function initNextBmtmTurn(isTurnStart)
+	if isTurnStart or not (GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" and bmtm_WarParticipantsQueueIndex == 0) then
+		Verbose("Init next BMTM turn. Queue Index before:" .. bmtm_WarParticipantsQueueIndex);
+	
 
-	bmtm_lastUnitMoved = {};
-	local i = 0;
-	bmtm_WarParticipantsQueueIndex = bmtm_WarParticipantsQueueIndex % #bmtm_WarParticipants; -- Fix index in case of lost war members
-	-- Skip players who have ended their turn
-	while not isTurnStart
-		  and not Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsTurnActive()
-		  and Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsHuman()
-		  and i <= #bmtm_WarParticipants do
+		bmtm_lastUnitMoved = {};
+		local i = 0;
+		bmtm_WarParticipantsQueueIndex = bmtm_WarParticipantsQueueIndex % #bmtm_WarParticipants; -- Fix index in case of lost war members
+		-- Skip players who have ended their turn
+		while not isTurnStart
+			  and not Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsTurnActive()
+			  and Players[bmtm_WarParticipants[bmtm_WarParticipantsQueueIndex+1]]:IsHuman()
+			  and i <= #bmtm_WarParticipants do
+			bmtm_WarParticipantsQueueIndex = (bmtm_WarParticipantsQueueIndex + 1) % #bmtm_WarParticipants;
+			i = i + 1;	
+		end
+		Verbose("Queue Index mid:" .. bmtm_WarParticipantsQueueIndex);
+		-- Initialize next BMTM turn
+		for i, iPlayer in ipairs(bmtm_WarParticipants) do
+			Verbose("War Participant ID:" .. i);		
+			Initialize(iPlayer, (i-1) == bmtm_WarParticipantsQueueIndex); -- Lua table index begins at 1, that's why we have to substract		
+		end	
 		bmtm_WarParticipantsQueueIndex = (bmtm_WarParticipantsQueueIndex + 1) % #bmtm_WarParticipants;
-		i = i + 1;	
+		Verbose("Queue Index after:" .. bmtm_WarParticipantsQueueIndex);
 	end
-	Verbose("Queue Index mid:" .. bmtm_WarParticipantsQueueIndex);
-	-- Initialize next BMTM turn
-	for i, iPlayer in ipairs(bmtm_WarParticipants) do
-		Verbose("War Participant ID:" .. i);		
-		Initialize(iPlayer, (i-1) == bmtm_WarParticipantsQueueIndex); -- Lua table index begins at 1, that's why we have to substract		
-	end	
-	bmtm_WarParticipantsQueueIndex = (bmtm_WarParticipantsQueueIndex + 1) % #bmtm_WarParticipants;
-	Verbose("Queue Index after:" .. bmtm_WarParticipantsQueueIndex);
 end
 
 local function setBmtmTurnQueueIndex(iTargetPlayer:number)
@@ -354,7 +367,7 @@ local function OnDiplomacyDeclareWar(actingPlayer:number, reactingPlayer:number)
   if isRelevantWar(actingPlayer, reactingPlayer) then
 	initWarParticipants();
 	setBmtmTurnQueueIndex(actingPlayer);
-	initNextBmtmTurn();
+	initNextBmtmTurn(true);
 	ShowBmtmUI();
 	ContextPtr:SetHide(false);
   end
@@ -401,12 +414,48 @@ local function OnMultiplayerChat(fromPlayer, toPlayer, text, eTargetType)
 	end
 end
 
+local function OnTurnTimerUpdated(elapsedTime :number, maxTurnTime :number)
+
+	if isAtWarWithHumans(Game.GetLocalPlayer()) and maxTurnTime > 0 then
+		local timeRemaining : number = maxTurnTime - elapsedTime;
+		bmtm_TurnTimePerPlayer = maxTurnTime / #bmtm_WarParticipants;
+		--Verbose("elapsedTime: " .. FormatTimeRemaining(elapsedTime) .. " (".. elapsedTime .. ")");
+		--Verbose("bmtm_WarParticipantsQueueIndex: " .. bmtm_WarParticipantsQueueIndex);
+		--Verbose("bmtm_TurnTimePerPlayer" .. FormatTimeRemaining(bmtm_TurnTimePerPlayer) .. " (".. bmtm_TurnTimePerPlayer .. ")");
+		local currentBmtmTurnElapsedTime = elapsedTime - bmtm_WarParticipantsQueueIndex*bmtm_TurnTimePerPlayer;
+		
+		local localPlayerWarParticipantIndex = nil;
+
+		localPlayerWarParticipantIndex = table_getIndexFromElement(bmtm_WarParticipants, Game.GetLocalPlayer());
+		--Verbose("localPlayerWarParticipantIndex: " .. localPlayerWarParticipantIndex)
+		local timeUntilLocalPlayerTurnBegin = bmtm_TurnTimePerPlayer*(localPlayerWarParticipantIndex-1) - elapsedTime;
+		local timeUntilLocalPlayerTurnEnd = timeUntilLocalPlayerTurnBegin+bmtm_TurnTimePerPlayer;
+		--Verbose("currentBmtmTurnElapsedTime: " .. FormatTimeRemaining(currentBmtmTurnElapsedTime) .. " (".. currentBmtmTurnElapsedTime .. ")");		
+		--Verbose("timeUntilLocalPlayerTurnBegin: " .. FormatTimeRemaining(timeUntilLocalPlayerTurnBegin) .. " (".. timeUntilLocalPlayerTurnBegin .. ")");		
+		if(currentBmtmTurnElapsedTime > 0 and bmtm_WarParticipantsQueueIndex ~= 0) then
+			initNextBmtmTurn();
+		elseif timeUntilLocalPlayerTurnEnd > -2 then	
+			--Verbose("check1");
+			if bmtm_RemainingMilitaryActions[Game.GetLocalPlayer()] > 0 then
+				--Verbose("check2");
+				bmtm_remainingTime = timeUntilLocalPlayerTurnEnd;
+			else
+				--Verbose("check3");
+				bmtm_remainingTime = timeUntilLocalPlayerTurnBegin;
+			end
+
+			RefreshUI();
+		end
+	end
+
+end
+
 ----------------
 -- Main Setup --
 ----------------
 Verbose("Turn Mode: " .. (GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") or ""));
 
-if string.find(GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") or "", "BMTM") or singlePlayerTestingMode then
+if string.find(GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") or "", "BMTM") then
 	Verbose("BMTM activated");
 
 	Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone);
@@ -418,6 +467,9 @@ if string.find(GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") or "", "BMTM")
 	--Events.UnitSelectionChanged.Add(OnUnitSelectionChanged);
 	Events.CombatVisBegin.Add(OnCombatVisBegin);
 	Events.MultiplayerChat.Add(OnMultiplayerChat);
+	if GameConfiguration.GetValue("BMTM_TURN_PHASE_TYPE") == "BMTM_TURNPHASE_DYN_SIM_SINGLE" then
+		Events.TurnTimerUpdated.Add(OnTurnTimerUpdated);
+	end
 	--Events.UnitOperationStarted.Add(OnUnitOperationStarted);
 
 	--LuaEvents.BmtmNextTurnInitializedManually.Add(OnBmtmNextTurnInitializedManually)

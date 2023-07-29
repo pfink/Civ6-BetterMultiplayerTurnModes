@@ -5,9 +5,9 @@
     <Name>Better Multiplayer Turn Modes</Name>
     <Guid>db2d862d-df4e-4718-9565-508a37c29f81</Guid>
     <ProjectGuid>67da609f-0420-464b-91ef-6c3552627846</ProjectGuid>
-    <ModVersion>91</ModVersion>
+    <ModVersion>92</ModVersion>
     <Teaser>This mod adds more turn modes for Internet Multiplayer Games.</Teaser>
-    <Description>This mod adds more turn modes for Internet Multiplayer Games. Version: 0.9.1</Description>
+    <Description>This mod adds more turn modes for Internet Multiplayer Games. Version: 0.9.2</Description>
     <Authors>Patrick Fink</Authors>
     <AffectsSavedGames>false</AffectsSavedGames>
     <SupportsSinglePlayer>true</SupportsSinglePlayer>
